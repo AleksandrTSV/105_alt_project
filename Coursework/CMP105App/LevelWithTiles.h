@@ -37,6 +37,16 @@ private:
     const sf::Vector2i WORLD_SIZE = { 2880, 648 };
     const sf::Vector2i VIEW_SIZE = { 432, 432 };
 
+    // Pause
+    bool m_isPaused = false;
+    GameObject m_pauseOverlay;
+    sf::Text m_pauseTitle;
+    sf::Text m_pauseHint;
 
+    GameObject m_resumeButton;
+    sf::Text m_resumeLabel;
+
+    GameObject m_menuButton;
+    sf::Text m_menuLabel;
 };
 
