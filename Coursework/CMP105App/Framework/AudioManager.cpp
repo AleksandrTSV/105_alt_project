@@ -107,3 +107,19 @@ sf::Music* AudioManager::getMusic(const std::string& tag)
 
 	return nullptr;
 }
+
+void AudioManager::pauseAllMusic()
+{
+	for (auto& pair : m_musicStreams)
+		pair.second->pause();
+}
+
+void AudioManager::resumeAllMusic()
+{
+	for (auto& pair : m_musicStreams)
+	{
+		// resume only what was paused
+		if (pair.second->getStatus() == sf::Music::Status::Paused)
+			pair.second->play();
+	}
+}

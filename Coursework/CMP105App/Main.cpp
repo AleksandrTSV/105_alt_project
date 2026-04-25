@@ -93,6 +93,7 @@ int main()
 	Menu menu(window, input, gameState, audioManager);
 	LevelWithTiles tile_level(window, input, gameState, audioManager);
 	LevelTwoWithTiles tile_level_two(window, input, gameState, audioManager);
+	//PauseScreen pauseScreen(window, input, gameState, audioManager);
 	Scene* currentScene = &menu;
 
 	// Initialise objects for delta time
@@ -106,7 +107,7 @@ int main()
 	{
 		{State::MENU, &menu},
 		{State::LEVELONE, &tile_level},
-		{State::LEVELTWO, &tile_level_two}
+		{State::LEVELTWO, &tile_level_two},
 	};
 	
 	// Game Loop

@@ -45,6 +45,12 @@ public:
 	// Returns nullptr if the tag is not found.
 	sf::Music* getMusic(const std::string& tag);
 
+	//Pauses all currently playing music streams
+	void pauseAllMusic();
+
+	//Resumes the music that was paused
+	void resumeAllMusic();
+
 private:
 	// Using std::map for efficient, key-based lookup of sounds.
 	// The key is the tag (e.g., "player_shoot"), the value is the SoundObject.
