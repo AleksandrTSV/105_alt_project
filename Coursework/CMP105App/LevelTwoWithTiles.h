@@ -30,6 +30,7 @@ private:
 
     Coin m_coin;
     GameObject m_boopBlock;
+    bool m_blockUsed = false;
     Flag m_flag;
 
     const sf::Vector2i WORLD_SIZE = { 2880, 648 };
@@ -48,5 +49,9 @@ private:
         "I feel so powerful\nalmost like I\ncan double-jump",
         "Press F to end the day"
     };
+
+    sf::Vector2f m_cameraTarget;       // where we want to go
+    const float CAM_LERP = 5.0f;      // the speed at which the camera follows the player (higher = harder)
+    const float CAM_LOOKAHEAD = 100.f;  // pixels ahead
 };
 
