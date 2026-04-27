@@ -105,7 +105,7 @@ LevelWithTiles::LevelWithTiles(sf::RenderWindow& window, Input& input, GameState
 	m_promptTimer = PROMPT_TIME;
 	if (!m_tileTexture.loadFromFile("gfx/tilemap.png")) std::cerr << "no tile image found";
 
-	//Setup UI for pause
+	//Setup UI for pause----------------------------------------------------
 	m_pauseOverlay.setSize({ 432, 432 });
 	m_pauseOverlay.setFillColor(sf::Color(0, 0, 0, 150));
 
@@ -353,11 +353,11 @@ void LevelWithTiles::render()
 		sf::Vector2f center = m_window.getView().getCenter();
 
 		m_pauseOverlay.setPosition(center - sf::Vector2f(216, 216));
-		m_pauseTitle.setPosition(center + sf::Vector2f(-100, -140));
+		m_pauseTitle.setPosition(center + sf::Vector2f(-95, -140));
 		m_resumeButton.setPosition(center + sf::Vector2f(-108, -30));
-		m_resumeLabel.setPosition(center + sf::Vector2f(-75, -17));
+		m_resumeLabel.setPosition(center + sf::Vector2f(-50, -17));
 		m_menuButton.setPosition(center + sf::Vector2f(-108, 50));
-		m_menuLabel.setPosition(center + sf::Vector2f(-90, 63));
+		m_menuLabel.setPosition(center + sf::Vector2f(-60, 63));
 		m_pauseHint.setPosition(center + sf::Vector2f(-100, 120));
 
 
