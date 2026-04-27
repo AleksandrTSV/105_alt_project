@@ -30,12 +30,15 @@ Player::Player()
 
 void Player::handleInput(float dt)
 {
-	m_accel = { 0,0 };
+	float targetX = 0.f;
 
 	if (m_input->isKeyDown(sf::Keyboard::Scancode::A))
-		m_accel.x -= SPEED;
+		targetX -= SPEED;
 	if (m_input->isKeyDown(sf::Keyboard::Scancode::D))
-		m_accel.x += SPEED;
+		targetX += SPEED;
+
+	m_velocity.x = targetX; //Instant reaction without accumulation
+
 	if (m_input->isPressed(sf::Keyboard::Scancode::Space) && m_isGrounded)
 	{
 		m_velocity.y = - JUMP_FORCE;
@@ -84,12 +87,7 @@ void Player::handleInput(float dt)
 
 void Player::update(float dt)
 {
-	// newtonian model
-	m_accel.y += GRAVITY;
-	m_velocity += dt * m_accel;
-	if (m_isGrounded && abs(m_accel.x) < 1.f) m_velocity *= DRAG_FACTOR;
-	else if (!m_isGrounded) m_velocity *= AIR_DRAG_FACTOR;
-	else if (m_accel.x * m_velocity.x < 0) m_velocity *= TURN_DRAG;
+	m_velocity.y += GRAVITY * dt;
 
 	m_isGrounded = false;	// every frame we are falling unless proved otherwise by floor collision
 

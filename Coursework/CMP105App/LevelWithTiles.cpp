@@ -297,6 +297,9 @@ void LevelWithTiles::update(float dt)
 	if (m_player.getPosition().y > 1200)
 	{
 		m_player.reset();
+		m_flagLeverPulled = false;
+		m_lever.setUsed(false);
+		m_audio.stopAllSounds();
 		m_audio.playSoundbyName("death");
 	}
 
@@ -308,18 +311,31 @@ void LevelWithTiles::update(float dt)
 void LevelWithTiles::updateCameraAndBackground()
 {
 	auto view = m_window.getView();
-	auto player_pos = m_player.getPosition() + m_player.getSize() * 0.5f;
+	sf::Vector2f playerCenter = m_player.getPosition() + m_player.getSize() * 0.5f;
 
 	float halfViewWidth = VIEW_SIZE.x / 2.0f;
 	float halfViewHeight = VIEW_SIZE.y / 2.0f;
 
-	player_pos.x = std::clamp(player_pos.x, halfViewWidth, WORLD_SIZE.x - halfViewWidth);
-	player_pos.y = std::clamp(player_pos.y, halfViewHeight, WORLD_SIZE.y - halfViewHeight);
+	float lookahead = 0.f;
+	if (m_player.getVelocity().x > 0.5f)
+		lookahead = CAM_LOOKAHEAD;
+	else if (m_player.getVelocity().x < -0.5f)
+		lookahead = -CAM_LOOKAHEAD;
 
-	view.setCenter(player_pos);
+	m_cameraTarget.x = playerCenter.x + lookahead;
+	m_cameraTarget.y = playerCenter.y;
+
+	m_cameraTarget.x = std::clamp(m_cameraTarget.x, halfViewWidth, (float)WORLD_SIZE.x - halfViewWidth);
+	m_cameraTarget.y = std::clamp(m_cameraTarget.y, halfViewHeight, (float)WORLD_SIZE.y - halfViewHeight);
+
+	// Lerp
+	sf::Vector2f currentCenter = view.getCenter();
+	sf::Vector2f newCenter = currentCenter + (m_cameraTarget - currentCenter) * CAM_LERP * (1.f / 60.f);
+
+	view.setCenter(newCenter);
 	m_window.setView(view);
 
-	m_bgtilemap.setPosition({ player_pos.x - halfViewWidth, 0 });
+	m_bgtilemap.setPosition({ newCenter.x - halfViewWidth, 0 });
 }
 
 void LevelWithTiles::render()
