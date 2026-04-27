@@ -26,13 +26,15 @@ public:
     bool canDoubleJump() { return m_canDoubleJump; };
     void setAudio(AudioManager* audio) { m_audio = audio; };
 
+    void setLeverPulled(bool value) { m_leverPulled = value; }
+    sf::Vector2f getVelocity() const{ return m_velocity; }
+
 private:
     sf::Texture m_dinoTexture;
     Animation* m_currAnim;
     Animation m_idle;
     Animation m_walk;
     Animation m_sprint;
-    sf::Vector2f m_accel;
     float m_sprintTimer = 0.f;
     bool m_isGrounded;
     float m_leftEdge;
@@ -47,12 +49,8 @@ private:
 
     const float SPRINT_COOLDOWN = 2.0f;
     const float SPRINT_SPEED_MULT = 2.5f;
-    const float SPEED = 10.0f;
-    const float GRAVITY = 50.0f;
-    const float COEFF_OF_REST = 0.8f;
-    const float DRAG_FACTOR = 0.9f;
-    const float AIR_DRAG_FACTOR = 0.99f;
-    const float TURN_DRAG = 0.6f;       // allow snappy decel for turning
+    const float SPEED = 8.0f;
+    const float GRAVITY = 70.0f;
     const float JUMP_FORCE = 20.0f;
     const float SPRINT_ANIM_THRESHOLD = 1.2f * SPEED;
     const float ACTIVATE_RANGE_SQUARED = 700.0f;

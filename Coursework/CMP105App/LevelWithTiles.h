@@ -48,5 +48,9 @@ private:
 
     GameObject m_menuButton;
     sf::Text m_menuLabel;
+
+    sf::Vector2f m_cameraTarget;       // where we want to go
+    const float CAM_LERP = 5.0f;      // the speed at which the camera follows the player (higher = harder)
+    const float CAM_LOOKAHEAD = 100.f;  // pixels ahead
 };
 
