@@ -1,7 +1,11 @@
 #include "LevelTwoWithTiles.h"
 
 LevelTwoWithTiles::LevelTwoWithTiles(sf::RenderWindow& window, Input& input, GameState& gameState, AudioManager& audio)
-	: Scene(window, input, gameState, audio), m_alertText(m_font)
+	: Scene(window, input, gameState, audio), m_alertText(m_font),
+	m_pauseTitle(m_font),
+	m_pauseHint(m_font),
+	m_resumeLabel(m_font),
+	m_menuLabel(m_font)
 {
 	GameObject tile;
 	std::vector<GameObject> tileSet;
@@ -124,7 +128,45 @@ LevelTwoWithTiles::LevelTwoWithTiles(sf::RenderWindow& window, Input& input, Gam
 	m_alertText.setCharacterSize(36);
 	m_alertText.setFillColor(sf::Color::Black);
 
-	
+	//Setup UI for pause------------------------------------------------------
+	m_pauseOverlay.setSize({ 432, 432 });
+	m_pauseOverlay.setFillColor(sf::Color(0, 0, 0, 150));
+
+	//Title "Pause"
+	m_pauseTitle.setFont(m_font);
+	m_pauseTitle.setString("PAUSED");
+	m_pauseTitle.setCharacterSize(48);
+	m_pauseTitle.setFillColor(sf::Color::White);
+	m_pauseTitle.setPosition({ 130, 80 });
+
+	//Button "Resume"
+	m_resumeButton.setSize({ 216, 56 });
+	m_resumeButton.setCollisionBox({ {0, 0}, {216, 56} });
+	m_resumeButton.setFillColor(sf::Color(80, 80, 200, 180));
+
+	m_resumeLabel.setFont(m_font);
+	m_resumeLabel.setString("Resume");
+	m_resumeLabel.setCharacterSize(24);
+	m_resumeLabel.setFillColor(sf::Color::White);
+	m_resumeLabel.setPosition({ 160, 193 });
+
+	//Button "Menu"
+	m_menuButton.setSize({ 216, 56 });
+	m_menuButton.setCollisionBox({ {0, 0}, {216, 56} });
+	m_menuButton.setFillColor(sf::Color(200, 70, 70, 180));
+
+	m_menuLabel.setFont(m_font);
+	m_menuLabel.setString("Main Menu");
+	m_menuLabel.setCharacterSize(24);
+	m_menuLabel.setFillColor(sf::Color::White);
+	m_menuLabel.setPosition({ 145, 273 });
+
+	//Another way to resume
+	m_pauseHint.setFont(m_font);
+	m_pauseHint.setString("press Escape to resume");
+	m_pauseHint.setCharacterSize(16);
+	m_pauseHint.setFillColor(sf::Color(255, 255, 255, 130));
+	m_pauseHint.setPosition({ 120, 340 });
 
 }
 
@@ -147,6 +189,39 @@ void LevelTwoWithTiles::onEnd()
 
 void LevelTwoWithTiles::handleInput(float dt)
 {
+	if (m_input.isPressed(sf::Keyboard::Scancode::Escape))
+	{
+		m_isPaused = !m_isPaused;
+		if (m_isPaused)
+			m_audio.pauseAllMusic();
+		else
+			m_audio.resumeAllMusic();
+		return;
+	}
+
+	if (m_isPaused)
+	{
+		sf::Vector2i worldMouse = sf::Vector2i(m_window.mapPixelToCoords(
+			sf::Vector2i(m_input.getMouseX(), m_input.getMouseY())
+		));
+
+		if (m_input.isLeftMousePressed())
+		{
+			if (Collision::checkBoundingBox(m_resumeButton, worldMouse))
+			{
+				m_isPaused = false;
+				m_audio.resumeAllMusic();
+			}
+			else if (Collision::checkBoundingBox(m_menuButton, worldMouse))
+			{
+				m_isPaused = false;
+				m_audio.resumeAllMusic(); // onEnd() will call stopAllMusic() by itself
+				m_gameState.setCurrentState(State::MENU);
+			}
+		}
+		return;  // while pausing player can't play
+	}
+
 	m_player.handleInput(dt);
 
 	// if I press F on the flag  / I press escape.
@@ -161,6 +236,25 @@ void LevelTwoWithTiles::handleInput(float dt)
 
 void LevelTwoWithTiles::update(float dt)
 {
+	if (m_isPaused) //if paused, player can't control the dino
+	{
+		sf::Vector2i worldMouse = sf::Vector2i(m_window.mapPixelToCoords(
+			sf::Vector2i(m_input.getMouseX(), m_input.getMouseY())
+		));
+
+		m_resumeButton.setFillColor(
+			Collision::checkBoundingBox(m_resumeButton, worldMouse)
+			? sf::Color(100, 100, 255, 220)
+			: sf::Color(80, 80, 200, 180)
+		);
+		m_menuButton.setFillColor(
+			Collision::checkBoundingBox(m_menuButton, worldMouse)
+			? sf::Color(255, 90, 90, 220)
+			: sf::Color(200, 70, 70, 180)
+		);
+		return;
+	}
+
 	m_player.update(dt);
 	m_flag.update(dt);
 	if (m_coin.isAlive()) m_coin.update(dt);
@@ -283,5 +377,28 @@ void LevelTwoWithTiles::render()
 	m_window.draw(m_player);
 	if (m_coin.isAlive()) m_window.draw(m_coin);
 	m_window.draw(m_alertText);
+
+	if (m_isPaused)
+	{
+		sf::Vector2f center = m_window.getView().getCenter();
+
+		m_pauseOverlay.setPosition(center - sf::Vector2f(216, 216));
+		m_pauseTitle.setPosition(center + sf::Vector2f(-95, -140));
+		m_resumeButton.setPosition(center + sf::Vector2f(-108, -30));
+		m_resumeLabel.setPosition(center + sf::Vector2f(-50, -17));
+		m_menuButton.setPosition(center + sf::Vector2f(-108, 50));
+		m_menuLabel.setPosition(center + sf::Vector2f(-60, 63));
+		m_pauseHint.setPosition(center + sf::Vector2f(-100, 120));
+
+
+		m_window.draw(m_pauseOverlay);
+		m_window.draw(m_resumeButton);
+		m_window.draw(m_resumeLabel);
+		m_window.draw(m_menuButton);
+		m_window.draw(m_menuLabel);
+		m_window.draw(m_pauseTitle);
+		m_window.draw(m_pauseHint);
+	}
+
 	endDraw();
 }
