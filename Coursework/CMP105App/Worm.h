@@ -11,16 +11,20 @@ public:
 
     void setupPatrol(float leftEdge, float rightEdge);
     void update(float dt) override;
-    void reset();
+    void collisionResponse(GameObject& collider) override;
+    void knockback(float playerX);
 
 private:
     sf::Texture m_wormTexture;
     Animation m_walk;
     float m_leftPatrol;
     float m_rightPatrol;
-    float m_startX;
-    float m_startY;
     int m_direction;
 
-    const float SPEED = 80.0f;
+    bool is_Grounded = false;
+
+    const float SPEED = 4.0f;
+    const float GRAVITY = 50.0f;
+    const float KNOCKBACK_X = 8.0f;
+    const float KNOCKBACK_Y = -15.0f;
 };

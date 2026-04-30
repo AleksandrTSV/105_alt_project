@@ -1,5 +1,6 @@
 #pragma once
 #include "Framework/GameObject.h"
+#include "Framework/Animation.h"
 
 class Fireball :
     public GameObject
@@ -7,15 +8,14 @@ class Fireball :
 public:
     Fireball();
 
-    void launch(sf::Vector2f position, int direction);
+    void launch(sf::Vector2f position, bool goRight);
     void update(float dt) override;
-    void render(sf::RenderWindow& window);
 
 private:
-    sf::CircleShape m_outer;
-    sf::CircleShape m_inner;
+    sf::Texture m_fireballTexture;
+    Animation m_anim;
     float m_lifetime;
 
-    const float SPEED = 280.0f;
+    const float SPEED = 15.0f;
     const float MAX_LIFETIME = 4.0f;
 };
