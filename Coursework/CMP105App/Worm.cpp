@@ -2,6 +2,9 @@
 
 Worm::Worm()
 {
+    if (!m_wormTexture.loadFromFile("gfx/worm_sheet.png"))
+        std::cerr << "NO WORM TEXTURE";
+
     for (int i = 0; i < 6; ++i)
     {
         m_walk.addFrame({ {i * 64, 0}, {64, 64} });

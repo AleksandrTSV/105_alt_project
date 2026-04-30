@@ -1,6 +1,7 @@
 #pragma once
 #include "Framework/GameObject.h"
 #include "Framework/Animation.h"
+#include <iostream>
 
 class Worm :
     public GameObject
@@ -13,6 +14,7 @@ public:
     void reset();
 
 private:
+    sf::Texture m_wormTexture;
     Animation m_walk;
     float m_leftPatrol;
     float m_rightPatrol;

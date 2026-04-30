@@ -29,6 +29,8 @@ public:
     void setLeverPulled(bool value) { m_leverPulled = value; }
     sf::Vector2f getVelocity() const{ return m_velocity; }
 
+    void loseLife();
+
 private:
     sf::Texture m_dinoTexture;
     Animation* m_currAnim;
@@ -46,6 +48,13 @@ private:
     bool m_canDoubleJump;
     bool m_hasDoubleJumped;
     AudioManager* m_audio;
+
+    int m_lives = 3;
+    float m_invincibleTimer = 0.f;
+    const float INVINCIBLE_DURATION = 1.5f;
+    bool  m_shootRequested = false;
+    float m_shootCooldown = 0.f;
+    const float SHOOT_COOLDOWN = 2.0f;
 
     const float SPRINT_COOLDOWN = 2.0f;
     const float SPRINT_SPEED_MULT = 2.5f;
