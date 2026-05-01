@@ -23,6 +23,19 @@ HUD::HUD()
 		posX += offsetX;
 		m_HUD_Elements.push_back(hudElement);
 	}
+
+	if (!m_tileTexture.loadFromFile("gfx/tilemap.png"))
+		std::cerr << "Failed to load tilemap for HUD hearts\n";
+
+	for (int i = 0; i < 3; i++)
+	{
+		GameObject heart;
+		heart.setTexture(&m_tileTexture);
+		heart.setTextureRect(HEART_FULL);
+		heart.setSize({ 36.f, 36.f });
+		// The position will be updated in `update()` relative to the camera
+		m_hearts.push_back(heart);
+	}
 }
 
 void HUD::readInSpriteData()
@@ -40,6 +53,22 @@ void HUD::readInSpriteData()
 	inData.close();
 }
 
+void HUD::update(sf::RenderWindow& window, int lives)
+{
+	// We position the HUD in the top-left corner of the camera
+	sf::Vector2f topLeft = window.getView().getCenter()
+		- sf::Vector2f(window.getView().getSize() * 0.5f);
+
+	for (int i = 0; i < 3; i++)
+	{
+		m_hearts[i].setPosition({ topLeft.x + 8.f + i * 42.f, topLeft.y + 8.f });
+		// A full or empty heart, depending on lives
+		if (i < lives)
+			m_hearts[i].setTextureRect(HEART_FULL);
+		else
+			m_hearts[i].setTextureRect(HEART_EMPTY);
+	}
+}
 
 void HUD::render(sf::RenderWindow& window)
 {

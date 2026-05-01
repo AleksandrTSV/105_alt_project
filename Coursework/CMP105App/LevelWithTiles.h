@@ -7,6 +7,8 @@
 #include "Fireball.h"
 #include "Lever.h"
 #include "Flag.h"
+#include "HeartPickup.h"
+#include "HUD.h"
 #include <algorithm>
 
 class LevelWithTiles :
