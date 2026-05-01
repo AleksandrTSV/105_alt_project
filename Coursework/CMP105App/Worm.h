@@ -1,6 +1,7 @@
 #pragma once
 #include "Framework/GameObject.h"
 #include "Framework/Animation.h"
+#include "Framework/Collision.h"
 #include <iostream>
 
 class Worm :
@@ -10,6 +11,7 @@ public:
     Worm();
 
     void setupPatrol(float leftEdge, float rightEdge);
+    void checkEdges(std::vector<GameObject>* tiles);
     void update(float dt) override;
     void collisionResponse(GameObject& collider) override;
     void knockback(float playerX);
@@ -19,9 +21,10 @@ private:
     Animation m_walk;
     float m_leftPatrol;
     float m_rightPatrol;
-    int m_direction;
+    GameObject m_feelerRight;
+    GameObject m_feelerLeft;
 
-    bool is_Grounded = false;
+    bool m_isGrounded = false;
 
     const float SPEED = 4.0f;
     const float GRAVITY = 50.0f;

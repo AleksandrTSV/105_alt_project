@@ -29,7 +29,12 @@ public:
     void setLeverPulled(bool value) { m_leverPulled = value; }
     sf::Vector2f getVelocity() const{ return m_velocity; }
 
+    int  getLives() const { return m_lives; }
     void loseLife();
+    void gainLife() { if (m_lives < 3) m_lives++; }
+    bool isInvincible() const { return m_invincibleTimer > 0; }
+    bool wantsToShoot() { bool s = m_shootRequested; m_shootRequested = false; return s; }
+    bool isFacingRight() const { return !m_currAnim->getFlipped(); }
 
 private:
     sf::Texture m_dinoTexture;

@@ -18,6 +18,12 @@ Worm::Worm()
     setCollider(true);
     setAlive(true);
 
+    //For the checking if the worm is near the edge
+    m_feelerRight.setSize({ 4, 4 });
+    m_feelerRight.setCollisionBox({ {0, 0}, {4, 4} });
+    m_feelerLeft.setSize({ 4, 4 });
+    m_feelerLeft.setCollisionBox({ {0, 0}, {4, 4} });
+
     m_velocity.x = SPEED; //go right first
 }
 
@@ -27,31 +33,74 @@ void Worm::setupPatrol(float leftEdge, float rightEdge)
     m_rightPatrol = rightEdge;
 }
 
-void Worm::update(float dt)
+void Worm::checkEdges(std::vector<GameObject>* tiles)
 {
     if (!isAlive()) return;
 
-    is_Grounded = false;
+    // Position the tentacles just below the legs and at the edges of the worm
+    sf::Vector2f pos = getPosition();
+    sf::Vector2f size = getSize();
 
-    // Turn at the edges of the patrol zone
-    if (getPosition().x <= m_leftPatrol)
+    // The right tentacle — under the right edge, 4px below the bottom
+    m_feelerRight.setPosition({ pos.x + size.x - 4, pos.y + size.y + 2 });
+    // The left tentacle – beneath the left edge
+    m_feelerLeft.setPosition({ pos.x, pos.y + size.y + 2 });
+
+    bool groundRight = false;
+    bool groundLeft = false;
+
+    for (auto& tile : *tiles)
     {
-        m_velocity.x = SPEED;
-        m_walk.setFlipped(false);
+        if (!tile.isCollider()) continue;
+        if (Collision::checkBoundingBox(m_feelerRight, tile)) groundRight = true;
+        if (Collision::checkBoundingBox(m_feelerLeft, tile)) groundLeft = true;
     }
-    if (getPosition().x + getSize().x >= m_rightPatrol)
+
+    // Let’s go right, but there’s a cliff on the right — we’ll have to turn back
+    if (m_velocity.x > 0 && !groundRight)
     {
         m_velocity.x = -SPEED;
         m_walk.setFlipped(true);
     }
+    // Same on the left
+    if (m_velocity.x < 0 && !groundLeft)
+    {
+        m_velocity.x = SPEED;
+        m_walk.setFlipped(false);
+    }
+}
 
-    move(m_velocity);
+void Worm::update(float dt)
+{
+    if (!isAlive()) return;
+
+    move({ m_velocity.x, 0 });
     m_walk.animate(dt);
     setTextureRect(m_walk.getCurrentFrame());
 }
 
 void Worm::collisionResponse(GameObject& collider) 
 {
+    sf::FloatRect myBox = getCollisionBox();
+    sf::FloatRect tileBox = collider.getCollisionBox();
+    auto overlap = myBox.findIntersection(tileBox);
+    if (!overlap) return;
+
+    if (overlap->size.x < overlap->size.y)
+    {
+        if (myBox.position.x < tileBox.position.x)
+        {
+            move({ -overlap->size.x, 0 });
+            m_velocity.x = -SPEED;
+            m_walk.setFlipped(true);
+        }
+        else
+        {
+            move({ overlap->size.x, 0 });
+            m_velocity.x = SPEED;
+            m_walk.setFlipped(false);
+        }
+    }
 
 }
 
