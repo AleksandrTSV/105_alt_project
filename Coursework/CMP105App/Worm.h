@@ -17,7 +17,8 @@ public:
     void knockback(float playerX);
 
 private:
-    sf::Texture m_wormTexture;
+    static sf::Texture m_wormTexture;
+    static bool m_textureLoaded;
     Animation m_walk;
     float m_leftPatrol;
     float m_rightPatrol;
@@ -26,7 +27,7 @@ private:
 
     bool m_isGrounded = false;
 
-    const float SPEED = 4.0f;
+    const float SPEED = 2.0f;
     const float GRAVITY = 50.0f;
     const float KNOCKBACK_X = 8.0f;
     const float KNOCKBACK_Y = -15.0f;

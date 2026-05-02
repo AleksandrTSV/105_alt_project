@@ -1,9 +1,16 @@
 #include "Worm.h"
 
+sf::Texture Worm::m_wormTexture;
+bool Worm::m_textureLoaded = false;
+
 Worm::Worm()
 {
-    if (!m_wormTexture.loadFromFile("gfx/worm_sheet.png"))
-        std::cerr << "NO WORM TEXTURE";
+    if (!m_textureLoaded)
+    {
+        if (!m_wormTexture.loadFromFile("gfx/worm_sheet.png"))
+            std::cerr << "NO WORM TEXTURE\n";
+        m_textureLoaded = true;
+    }
 
     for (int i = 0; i < 6; ++i)
     {

@@ -72,8 +72,8 @@ void HUD::update(sf::RenderWindow& window, int lives)
 
 void HUD::render(sf::RenderWindow& window)
 {
-	for (GameObject& element : m_HUD_Elements)
+	for (GameObject& heart : m_hearts)
 	{
-		window.draw(element);
+		window.draw(heart);
 	}
 }

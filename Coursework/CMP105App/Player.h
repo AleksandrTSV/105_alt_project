@@ -29,6 +29,7 @@ public:
     void setLeverPulled(bool value) { m_leverPulled = value; }
     sf::Vector2f getVelocity() const{ return m_velocity; }
 
+    void setLives(int lives) { m_lives = lives; }
     int  getLives() const { return m_lives; }
     void loseLife();
     void gainLife() { if (m_lives < 3) m_lives++; }

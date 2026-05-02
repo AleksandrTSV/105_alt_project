@@ -1,10 +1,17 @@
 #include "Fireball.h"
 #include <iostream>
 
+sf::Texture Fireball::m_fireballTexture;
+bool Fireball::m_textureLoaded = false;
+
 Fireball::Fireball()
 {
-    if (!m_fireballTexture.loadFromFile("gfx/fireball_sheet.png"))
-        std::cerr << "Failed to load fireball_sheet.png";
+    if (!m_textureLoaded) 
+    {
+        if (!m_fireballTexture.loadFromFile("gfx/fireball_sheet.png"))
+            std::cerr << "Failed to load fireball_sheet.png";
+        m_textureLoaded = true;
+    }
     
     m_anim.addFrame({ {0,   0},   {128, 128} });
     m_anim.addFrame({ {128, 0},   {128, 128} });
@@ -22,6 +29,7 @@ Fireball::Fireball()
 
 void Fireball::launch(sf::Vector2f position, bool goRight)
 {
+    m_lifetime = 0.f;
     setPosition(position);
     m_velocity.x = goRight ? SPEED : -SPEED;
     m_velocity.y = 0;
@@ -35,10 +43,11 @@ void Fireball::update(float dt)
     if (!isAlive()) return;
     move(m_velocity * dt);
 
+    m_anim.animate(dt);
+    setTextureRect(m_anim.getCurrentFrame());
+    m_lifetime += dt;
 
-    m_lifetime -= dt;
-
-    if (m_lifetime <= 0.0f)
+    if (m_lifetime >= MAX_LIFETIME)
     {
         setAlive(false);
     }

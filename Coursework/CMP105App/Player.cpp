@@ -192,4 +192,7 @@ void Player::reset()
 	m_velocity = { 0,0 };
 	m_leverPulled = false;
 	m_gameEndTriggered = false;
+	m_shootCooldown = 0.f;
+	m_shootRequested = false;
+	m_invincibleTimer = 0.f;
 }

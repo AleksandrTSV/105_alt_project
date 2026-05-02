@@ -31,7 +31,7 @@ private:
 
     // IntRect for every type of heart in tilemap.png
     // row=3, col=5 -> full; col=7 -> empty
-    const sf::IntRect HEART_FULL = { {5 * 19, 3 * 19}, {18, 18} };
-    const sf::IntRect HEART_EMPTY = { {7 * 19, 3 * 19}, {18, 18} };
+    const sf::IntRect HEART_FULL = { {4 * 19, 2 * 19}, {18, 18} };
+    const sf::IntRect HEART_EMPTY = { {6 * 19, 2 * 19}, {18, 18} };
 };
 
