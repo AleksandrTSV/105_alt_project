@@ -5,7 +5,9 @@ LevelWithTiles::LevelWithTiles(sf::RenderWindow& window, Input& input, GameState
 	m_pauseTitle(m_font),
 	m_pauseHint(m_font),
 	m_resumeLabel(m_font),
-	m_menuLabel(m_font)
+	m_menuLabel(m_font),
+	m_gameOverTitle(m_font),
+	m_gameOverHint(m_font)
 {
 	GameObject tile;
 	std::vector<GameObject> tileSet;
@@ -105,6 +107,24 @@ LevelWithTiles::LevelWithTiles(sf::RenderWindow& window, Input& input, GameState
 	m_promptTimer = PROMPT_TIME;
 	if (!m_tileTexture.loadFromFile("gfx/tilemap.png")) std::cerr << "no tile image found";
 
+	// Setup Fireballs
+	for (int i = 0; i < 5; i++)
+		m_fireballs.push_back(Fireball());
+
+	// Setup Worms
+	auto makeWorm = [&](float x, float y, float leftEdge, float rightEdge)
+		{
+			Worm w;
+			w.setPosition({ x, y });
+			w.setupPatrol(leftEdge, rightEdge);
+			m_worms.push_back(w);
+		};
+	makeWorm(1300, 109, 1120, 1540);
+
+	// Setup HeratPickups
+	for (int i = 0; i < 5; i++)
+		m_heartPickups.push_back(HeartPickup());
+
 	//Setup UI for pause----------------------------------------------------
 	m_pauseOverlay.setSize({ 432, 432 });
 	m_pauseOverlay.setFillColor(sf::Color(0, 0, 0, 150));
@@ -164,6 +184,20 @@ LevelWithTiles::LevelWithTiles(sf::RenderWindow& window, Input& input, GameState
 	m_lever.setUsed(false);
 	m_player.setLeverPosition({ 2730, 252 });
 	m_player.setAudio(&m_audio);
+
+	// UI Game Over
+	m_gameOverOverlay.setSize({ 432, 432 });
+	m_gameOverOverlay.setFillColor(sf::Color(180, 0, 0, 170));
+
+	m_gameOverTitle.setFont(m_font);
+	m_gameOverTitle.setString("Game Over!");
+	m_gameOverTitle.setCharacterSize(52);
+	m_gameOverTitle.setFillColor(sf::Color::White);
+
+	m_gameOverHint.setFont(m_font);
+	m_gameOverHint.setString("Press Enter to return\nto the main menu");
+	m_gameOverHint.setCharacterSize(22);
+	m_gameOverHint.setFillColor(sf::Color(255, 255, 255, 200));
 }
 
 void LevelWithTiles::handleInput(float dt)
@@ -201,6 +235,16 @@ void LevelWithTiles::handleInput(float dt)
 		return;  // while pausing player can't play
 	}
 
+	if (m_isGameOver)
+	{
+		if (m_input.isPressed(sf::Keyboard::Scancode::Enter)) 
+		{
+			m_isGameOver = false;
+			m_gameState.setCurrentState(State::MENU);
+		}
+		return;
+	}
+
 	m_player.handleInput(dt);
 }
 
@@ -232,8 +276,75 @@ void LevelWithTiles::update(float dt)
 	m_lever.update(dt);
 	m_player.update(dt);
 
+	std::vector<GameObject>& level = *m_tilemap.getLevel(); // Here are all the tiles you can interact with
 
-	std::vector<GameObject>& level = *m_tilemap.getLevel();
+	// === FIREBALLS ===
+	// Shoot if the player has requested it and there is a free ball
+	if (m_player.wantsToShoot())
+	{
+		for (auto& fb : m_fireballs)
+		{
+			if (!fb.isAlive())
+			{
+				sf::Vector2f spawnPos = m_player.getPosition()
+					+ sf::Vector2f(m_player.isFacingRight() ? m_player.getSize().x : -64.f,
+						m_player.getSize().y * 0.01f);
+				fb.launch(spawnPos, m_player.isFacingRight());
+				m_audio.playSoundbyName("fire");
+				break;
+			}
+		}
+	}
+	// We update fireballs and check for collisions with tiles and worms
+	for (auto& fb : m_fireballs)
+	{
+		if (!fb.isAlive()) continue;
+		fb.update(dt);
+
+		// Destroy fireball if it goes off the edge of the world
+		if (fb.getPosition().x < 0 || fb.getPosition().x > WORLD_SIZE.x)
+		{
+			fb.setAlive(false);
+			continue;
+		}
+
+		// Collision with tiles - fireball is being extinguished
+		for (auto& t : level)
+		{
+			if (t.isCollider() && Collision::checkBoundingBox(fb, t))
+			{
+				fb.setAlive(false);
+				break;
+			}
+		}
+		if (!fb.isAlive()) continue;
+
+		// Collision with worms
+		for (auto& worm : m_worms)
+		{
+			if (!worm.isAlive()) continue;
+			if (Collision::checkBoundingBox(fb, worm))
+			{
+				worm.setAlive(false);
+				fb.setAlive(false);
+
+				// 30% chance of heart drop
+				if (std::rand() % 10 < 3)
+				{
+					for (auto& hp : m_heartPickups)
+					{
+						if (!hp.isAlive())
+						{
+							hp.spawn(worm.getPosition(), &m_tileTexture);
+							break;
+						}
+					}
+				}
+				break;
+			}
+		}
+	}
+
 	for (auto& t : level)
 	{
 		if (t.isCollider() && Collision::checkBoundingBox(m_player, t))
@@ -241,6 +352,53 @@ void LevelWithTiles::update(float dt)
 			m_player.collisionResponse(t);
 		}
 	}
+
+	// === WORMS ===
+	for (auto& worm : m_worms)
+	{
+		if (!worm.isAlive()) continue;
+		worm.checkEdges(&level);
+		worm.update(dt);
+
+		// A worm colliding with tiles
+		for (auto& t : level)
+		{
+			if (t.isCollider() && Collision::checkBoundingBox(worm, t))
+				worm.collisionResponse(t);
+		}
+
+		// A worm colliding with a player
+		if (!m_player.isInvincible() && Collision::checkBoundingBox(m_player, worm))
+		{
+			m_player.loseLife();
+			m_audio.playSoundbyName("hit");
+			worm.knockback(m_player.getPosition().x);
+		}
+	}
+	// === HEART PICKUPS ===
+	for (auto& hp : m_heartPickups)
+	{
+		if (!hp.isAlive()) continue;
+		hp.update(dt);
+
+		// Falls to the floor
+		for (auto& t : level)
+		{
+			if (t.isCollider() && Collision::checkBoundingBox(hp, t))
+				hp.collisionResponse(t);
+		}
+
+		// Picked up by the player
+		if (Collision::checkBoundingBox(m_player, hp) && m_player.getLives() < 3)
+		{
+			m_audio.playSoundbyName("healing");
+			m_player.gainLife();
+			hp.setAlive(false);
+		}
+	}
+
+	// === HUD ===
+	m_hud.update(m_window, m_player.getLives());
 	
 	// show text if player has dropped very low down
 	if (m_promptTimer > 0)
@@ -287,8 +445,7 @@ void LevelWithTiles::update(float dt)
 		m_lever.setUsed(false);
 	}
 	if (m_player.getGameEndTriggered())
-	{
-		
+	{		
 		m_gameState.setCurrentState(State::MENU);
 	}
 
@@ -297,10 +454,18 @@ void LevelWithTiles::update(float dt)
 	if (m_player.getPosition().y > 1200)
 	{
 		m_player.reset();
+		m_player.loseLife();
 		m_flagLeverPulled = false;
 		m_lever.setUsed(false);
 		m_audio.stopAllSounds();
 		m_audio.playSoundbyName("death");
+	}
+
+	if (m_player.getLives() <= 0)
+	{
+		m_isGameOver = true;
+		m_audio.stopAllMusic();	
+		return;
 	}
 
 	// camera follows player, bounded.
@@ -348,36 +513,64 @@ void LevelWithTiles::render()
 	m_window.draw(m_player);
 	m_window.draw(m_alertText);
 
-	if (m_isPaused)
-	{
-		sf::Vector2f center = m_window.getView().getCenter();
+	for (auto& worm : m_worms)
+		if (worm.isAlive()) m_window.draw(worm);
+	for (auto& fb : m_fireballs)
+		if (fb.isAlive()) m_window.draw(fb);
+	for (auto& hp : m_heartPickups)
+		if (hp.isAlive()) m_window.draw(hp);
+	m_hud.render(m_window);
 
-		m_pauseOverlay.setPosition(center - sf::Vector2f(216, 216));
-		m_pauseTitle.setPosition(center + sf::Vector2f(-95, -140));
-		m_resumeButton.setPosition(center + sf::Vector2f(-108, -30));
-		m_resumeLabel.setPosition(center + sf::Vector2f(-50, -17));
-		m_menuButton.setPosition(center + sf::Vector2f(-108, 50));
-		m_menuLabel.setPosition(center + sf::Vector2f(-60, 63));
-		m_pauseHint.setPosition(center + sf::Vector2f(-100, 120));
-
-
-		m_window.draw(m_pauseOverlay);
-		m_window.draw(m_resumeButton);
-		m_window.draw(m_resumeLabel);
-		m_window.draw(m_menuButton);
-		m_window.draw(m_menuLabel);
-		m_window.draw(m_pauseTitle);
-		m_window.draw(m_pauseHint);
-	}
+	if (m_isPaused) drawPauseUI();
+	if (m_isGameOver) drawGameOverUI();
 
 	endDraw();
+}
+
+void LevelWithTiles::drawPauseUI() 
+{
+	sf::Vector2f center = m_window.getView().getCenter();
+
+	m_pauseOverlay.setPosition(center - sf::Vector2f(216, 216));
+	m_pauseTitle.setPosition(center + sf::Vector2f(-95, -140));
+	m_resumeButton.setPosition(center + sf::Vector2f(-108, -30));
+	m_resumeLabel.setPosition(center + sf::Vector2f(-50, -17));
+	m_menuButton.setPosition(center + sf::Vector2f(-108, 50));
+	m_menuLabel.setPosition(center + sf::Vector2f(-60, 63));
+	m_pauseHint.setPosition(center + sf::Vector2f(-100, 120));
+
+
+	m_window.draw(m_pauseOverlay);
+	m_window.draw(m_resumeButton);
+	m_window.draw(m_resumeLabel);
+	m_window.draw(m_menuButton);
+	m_window.draw(m_menuLabel);
+	m_window.draw(m_pauseTitle);
+	m_window.draw(m_pauseHint);
+}
+
+void LevelWithTiles::drawGameOverUI() 
+{
+	sf::Vector2f center = m_window.getView().getCenter();
+
+	m_gameOverOverlay.setPosition(center - sf::Vector2f(216, 216));
+	m_gameOverTitle.setPosition(center + sf::Vector2f(-130, -80));
+	m_gameOverHint.setPosition(center + sf::Vector2f(-100, 20));
+
+	m_window.draw(m_gameOverOverlay);
+	m_window.draw(m_gameOverTitle);
+	m_window.draw(m_gameOverHint);
+
 }
 
 void LevelWithTiles::onBegin()
 {
 	std::cout << "Level one has been started\n";
 	m_audio.playMusicbyName("bgm1");
-	
+
+	for (auto& worm : m_worms) worm.setAlive(true);
+	for (auto& fb : m_fireballs)  fb.setAlive(false);
+	for (auto& hp : m_heartPickups) hp.setAlive(false);
 }
 
 void LevelWithTiles::onEnd()
@@ -395,4 +588,7 @@ void LevelWithTiles::onEnd()
 	// sfx
 	m_audio.stopAllSounds();
 	m_audio.stopAllMusic();
+	// Game over
+	m_isGameOver = false;
+	m_player.setLives(3);
 }

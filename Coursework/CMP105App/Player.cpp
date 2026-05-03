@@ -77,6 +77,13 @@ void Player::handleInput(float dt)
 		}
 	}
 
+	if (m_shootCooldown > 0) m_shootCooldown -= dt;
+	if (m_input->isPressed(sf::Keyboard::Scancode::E) && m_shootCooldown <= 0)
+	{
+		m_shootRequested = true;
+		m_shootCooldown = SHOOT_COOLDOWN;
+	}
+
 	// for debugging: "Where am I?"
 	if (m_input->isPressed(sf::Keyboard::Scancode::T))
 	{
@@ -90,6 +97,8 @@ void Player::update(float dt)
 	m_velocity.y += GRAVITY * dt;
 
 	m_isGrounded = false;	// every frame we are falling unless proved otherwise by floor collision
+
+	if (m_invincibleTimer > 0) m_invincibleTimer -= dt; 
 
 	if (m_sprintTimer > 0) m_sprintTimer -= dt;	// tick down the sprint cooldown
 
@@ -159,6 +168,14 @@ void Player::collisionResponse(GameObject& collider)
 	}
 }
 
+void Player::loseLife()
+{
+	if (m_invincibleTimer > 0) return; // not to lose all lives in one frame
+	m_lives--;
+	m_invincibleTimer = INVINCIBLE_DURATION;  
+	m_velocity.y = -JUMP_FORCE * 0.7f;        // to feel the impact
+}
+
 bool Player::inLeverRange()
 {
 	return (getPosition() - m_leverPosition).lengthSquared() < ACTIVATE_RANGE_SQUARED;
@@ -175,4 +192,7 @@ void Player::reset()
 	m_velocity = { 0,0 };
 	m_leverPulled = false;
 	m_gameEndTriggered = false;
+	m_shootCooldown = 0.f;
+	m_shootRequested = false;
+	m_invincibleTimer = 0.f;
 }

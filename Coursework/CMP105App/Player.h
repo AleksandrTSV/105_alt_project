@@ -29,6 +29,14 @@ public:
     void setLeverPulled(bool value) { m_leverPulled = value; }
     sf::Vector2f getVelocity() const{ return m_velocity; }
 
+    void setLives(int lives) { m_lives = lives; }
+    int  getLives() const { return m_lives; }
+    void loseLife();
+    void gainLife() { if (m_lives < 3) m_lives++; }
+    bool isInvincible() const { return m_invincibleTimer > 0; }
+    bool wantsToShoot() { bool s = m_shootRequested; m_shootRequested = false; return s; }
+    bool isFacingRight() const { return !m_currAnim->getFlipped(); }
+
 private:
     sf::Texture m_dinoTexture;
     Animation* m_currAnim;
@@ -46,6 +54,13 @@ private:
     bool m_canDoubleJump;
     bool m_hasDoubleJumped;
     AudioManager* m_audio;
+
+    int m_lives = 3;
+    float m_invincibleTimer = 0.f;
+    const float INVINCIBLE_DURATION = 1.5f;
+    bool  m_shootRequested = false;
+    float m_shootCooldown = 0.f;
+    const float SHOOT_COOLDOWN = 2.0f;
 
     const float SPRINT_COOLDOWN = 2.0f;
     const float SPRINT_SPEED_MULT = 2.5f;

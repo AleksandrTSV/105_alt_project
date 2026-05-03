@@ -6,6 +6,7 @@
 #include "Coin.h"
 #include "Flag.h"
 #include <algorithm> // for clamp
+#include <iostream>
 
 
 class LevelTwoWithTiles :
