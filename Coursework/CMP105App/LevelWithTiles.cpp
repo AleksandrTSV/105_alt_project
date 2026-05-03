@@ -290,6 +290,7 @@ void LevelWithTiles::update(float dt)
 					+ sf::Vector2f(m_player.isFacingRight() ? m_player.getSize().x : -64.f,
 						m_player.getSize().y * 0.01f);
 				fb.launch(spawnPos, m_player.isFacingRight());
+				m_audio.playSoundbyName("fire");
 				break;
 			}
 		}
@@ -370,6 +371,7 @@ void LevelWithTiles::update(float dt)
 		if (!m_player.isInvincible() && Collision::checkBoundingBox(m_player, worm))
 		{
 			m_player.loseLife();
+			m_audio.playSoundbyName("hit");
 			worm.knockback(m_player.getPosition().x);
 		}
 	}
@@ -387,8 +389,9 @@ void LevelWithTiles::update(float dt)
 		}
 
 		// Picked up by the player
-		if (Collision::checkBoundingBox(m_player, hp))
+		if (Collision::checkBoundingBox(m_player, hp) && m_player.getLives() < 3)
 		{
+			m_audio.playSoundbyName("healing");
 			m_player.gainLife();
 			hp.setAlive(false);
 		}
@@ -461,7 +464,7 @@ void LevelWithTiles::update(float dt)
 	if (m_player.getLives() <= 0)
 	{
 		m_isGameOver = true;
-		m_audio.stopAllMusic();
+		m_audio.stopAllMusic();	
 		return;
 	}
 
