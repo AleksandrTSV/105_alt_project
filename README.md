@@ -4,7 +4,7 @@
 
 **Dino Handyman** 
 
-A 2D platformer built with C++ and SFML in which the player controls a dinosaur handyman tasked with repairing wind turbines. The player must navigate two levels, interact with levers and flags, defeat worm enemies, and survive using a limited life system.
+A 2D platformer built with C++ and SFML in which the player controls a dinosaur handyman. The player must navigate two levels, interact with levers and flags, defeat worm enemies, and survive using a limited life system.
 
 **Controls:** 
 *	A / D - Move left / right
@@ -13,9 +13,6 @@ A 2D platformer built with C++ and SFML in which the player controls a dinosaur 
 *	F - Interact with lever / complete level
 *	E - Throw fireball (2 second cooldown)
 *	Escape - Pause / resume game
-*	R - Reset position (debug)
-*	T - Print coordinates to console (debug)
-
 
 ## Student Details
 
