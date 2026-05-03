@@ -5,7 +5,9 @@ LevelTwoWithTiles::LevelTwoWithTiles(sf::RenderWindow& window, Input& input, Gam
 	m_pauseTitle(m_font),
 	m_pauseHint(m_font),
 	m_resumeLabel(m_font),
-	m_menuLabel(m_font)
+	m_menuLabel(m_font),
+	m_gameOverTitle(m_font),
+	m_gameOverHint(m_font)
 {
 	GameObject tile;
 	std::vector<GameObject> tileSet;
@@ -168,6 +170,19 @@ LevelTwoWithTiles::LevelTwoWithTiles(sf::RenderWindow& window, Input& input, Gam
 	m_pauseHint.setFillColor(sf::Color(255, 255, 255, 130));
 	m_pauseHint.setPosition({ 120, 340 });
 
+	// UI Game Over
+	m_gameOverOverlay.setSize({ 432, 432 });
+	m_gameOverOverlay.setFillColor(sf::Color(180, 0, 0, 170));
+
+	m_gameOverTitle.setFont(m_font);
+	m_gameOverTitle.setString("Game Over!");
+	m_gameOverTitle.setCharacterSize(52);
+	m_gameOverTitle.setFillColor(sf::Color::White);
+
+	m_gameOverHint.setFont(m_font);
+	m_gameOverHint.setString("Press Enter to return\nto the main menu");
+	m_gameOverHint.setCharacterSize(22);
+	m_gameOverHint.setFillColor(sf::Color(255, 255, 255, 200));
 }
 
 void LevelTwoWithTiles::onBegin()
@@ -186,6 +201,9 @@ void LevelTwoWithTiles::onEnd()
 	// sfx
 	m_audio.stopAllSounds();
 	m_audio.stopAllMusic();
+
+	m_isGameOver = false;
+	m_player.setLives(3);
 }
 
 void LevelTwoWithTiles::handleInput(float dt)
@@ -233,6 +251,15 @@ void LevelTwoWithTiles::handleInput(float dt)
 		// return to menu.
 		m_gameState.setCurrentState(State::MENU);
 	}
+
+	if (m_isGameOver)
+	{
+		if (m_input.isPressed(sf::Keyboard::Scancode::Enter)) 
+		{
+			m_gameState.setCurrentState(State::MENU);
+		}
+		return;
+	}
 }
 
 void LevelTwoWithTiles::update(float dt)
@@ -259,6 +286,9 @@ void LevelTwoWithTiles::update(float dt)
 	m_player.update(dt);
 	m_flag.update(dt);
 	if (m_coin.isAlive()) m_coin.update(dt);
+
+	// === HUD ===
+	m_hud.update(m_window, m_player.getLives());
 
 	// handle collisions
 	std::vector<GameObject>& level = *m_tilemap.getLevel();
@@ -305,7 +335,15 @@ void LevelTwoWithTiles::update(float dt)
 	if (m_player.getPosition().y > 1200)
 	{
 		m_player.reset();
+		m_player.loseLife();
 		m_audio.playSoundbyName("death");
+	}
+
+	if (m_player.getLives() <= 0)
+	{
+		m_isGameOver = true;
+		m_audio.stopAllMusic();
+		return;
 	}
 
 	updateCameraAndBackground();
@@ -392,28 +430,46 @@ void LevelTwoWithTiles::render()
 	m_window.draw(m_player);
 	if (m_coin.isAlive()) m_window.draw(m_coin);
 	m_window.draw(m_alertText);
+	m_hud.render(m_window);
 
-	if (m_isPaused)
-	{
-		sf::Vector2f center = m_window.getView().getCenter();
-
-		m_pauseOverlay.setPosition(center - sf::Vector2f(216, 216));
-		m_pauseTitle.setPosition(center + sf::Vector2f(-95, -140));
-		m_resumeButton.setPosition(center + sf::Vector2f(-108, -30));
-		m_resumeLabel.setPosition(center + sf::Vector2f(-50, -17));
-		m_menuButton.setPosition(center + sf::Vector2f(-108, 50));
-		m_menuLabel.setPosition(center + sf::Vector2f(-60, 63));
-		m_pauseHint.setPosition(center + sf::Vector2f(-100, 120));
-
-
-		m_window.draw(m_pauseOverlay);
-		m_window.draw(m_resumeButton);
-		m_window.draw(m_resumeLabel);
-		m_window.draw(m_menuButton);
-		m_window.draw(m_menuLabel);
-		m_window.draw(m_pauseTitle);
-		m_window.draw(m_pauseHint);
-	}
+	if (m_isPaused) drawPauseUI();
+	if (m_isGameOver) drawGameOverUI();
 
 	endDraw();
+}
+
+void LevelTwoWithTiles::drawPauseUI()
+{
+	sf::Vector2f center = m_window.getView().getCenter();
+
+	m_pauseOverlay.setPosition(center - sf::Vector2f(216, 216));
+	m_pauseTitle.setPosition(center + sf::Vector2f(-95, -140));
+	m_resumeButton.setPosition(center + sf::Vector2f(-108, -30));
+	m_resumeLabel.setPosition(center + sf::Vector2f(-50, -17));
+	m_menuButton.setPosition(center + sf::Vector2f(-108, 50));
+	m_menuLabel.setPosition(center + sf::Vector2f(-60, 63));
+	m_pauseHint.setPosition(center + sf::Vector2f(-100, 120));
+
+
+	m_window.draw(m_pauseOverlay);
+	m_window.draw(m_resumeButton);
+	m_window.draw(m_resumeLabel);
+	m_window.draw(m_menuButton);
+	m_window.draw(m_menuLabel);
+	m_window.draw(m_pauseTitle);
+	m_window.draw(m_pauseHint);
+}
+
+void LevelTwoWithTiles::drawGameOverUI()
+{
+	sf::Vector2f center = m_window.getView().getCenter();
+
+	m_gameOverOverlay.setPosition(center - sf::Vector2f(216, 216));
+	m_gameOverTitle.setPosition(center + sf::Vector2f(-130, -80));
+	m_gameOverHint.setPosition(center + sf::Vector2f(-100, 20));
+
+	m_window.draw(m_gameOverOverlay);
+	m_window.draw(m_gameOverTitle);
+	m_window.draw(m_gameOverHint);
+
 }

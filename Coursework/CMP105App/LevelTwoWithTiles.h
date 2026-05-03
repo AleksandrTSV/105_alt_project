@@ -5,6 +5,7 @@
 #include "Player.h"
 #include "Coin.h"
 #include "Flag.h"
+#include "HUD.h"
 #include <algorithm> // for clamp
 #include <iostream>
 
@@ -24,6 +25,8 @@ public:
 private:
     void updateCameraAndBackground();
     void checkAndSetMessages();
+    void drawPauseUI();
+    void drawGameOverUI();
 
     TileMap m_tilemap;
     TileMap m_bgtilemap;
@@ -33,6 +36,7 @@ private:
     GameObject m_boopBlock;
     bool m_blockUsed = false;
     Flag m_flag;
+    HUD m_hud;
 
     const sf::Vector2i WORLD_SIZE = { 2880, 648 };
     const sf::Vector2i VIEW_SIZE = { 432, 432 };
@@ -63,6 +67,12 @@ private:
     GameObject m_menuButton;
     sf::Text m_menuLabel;
     
+    // Game Over
+    bool m_isGameOver = false;
+    GameObject m_gameOverOverlay;
+    sf::Text   m_gameOverTitle;
+    sf::Text   m_gameOverHint;
+
     sf::Vector2f m_cameraTarget;       // where we want to go
     const float CAM_LERP = 5.0f;      // the speed at which the camera follows the player (higher = harder)
     const float CAM_LOOKAHEAD = 100.f;  // pixels ahead

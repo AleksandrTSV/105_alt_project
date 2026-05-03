@@ -6,7 +6,6 @@ AudioManager::AudioManager()
 	addSound("wind", "sfx/wind.mp3");
 	addSound("death", "sfx/death.mp3");
 	addSound("hit", "sfx/hit-sound.mp3");
-	addSound("gameover", "sfx/gameover.wav");
 	addSound("fire", "sfx/fire-sound.mp3");
 	addSound("healing", "sfx/healing.mp3");
 

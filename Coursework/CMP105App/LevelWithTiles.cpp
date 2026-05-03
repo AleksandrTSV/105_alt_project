@@ -565,7 +565,6 @@ void LevelWithTiles::drawGameOverUI()
 
 void LevelWithTiles::onBegin()
 {
-	std::cout << "Level one has been started\n";
 	m_audio.playMusicbyName("bgm1");
 
 	for (auto& worm : m_worms) worm.setAlive(true);
@@ -575,7 +574,6 @@ void LevelWithTiles::onBegin()
 
 void LevelWithTiles::onEnd()
 {
-	std::cout << "Level one has been left\n";
 	// reset player and level state
 	m_player.reset();
 	m_flagLeverPulled = false;

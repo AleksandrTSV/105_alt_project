@@ -51,11 +51,6 @@ void Player::handleInput(float dt)
 		m_hasDoubleJumped = true;
 		m_audio->playSoundbyName("jump");
 	}
-	if (m_input->isKeyDown(sf::Keyboard::Scancode::R))	// Reset (for debugging)
-	{
-		setPosition({ 50,0 });
-		m_velocity = { 0,0 };
-	}
 	if (m_input->isPressed(sf::Keyboard::Scancode::LControl) && m_sprintTimer <= 0)
 	{
 		if (!m_currAnim->getFlipped())
@@ -82,12 +77,6 @@ void Player::handleInput(float dt)
 	{
 		m_shootRequested = true;
 		m_shootCooldown = SHOOT_COOLDOWN;
-	}
-
-	// for debugging: "Where am I?"
-	if (m_input->isPressed(sf::Keyboard::Scancode::T))
-	{
-		std::cout << getPosition().x << "/" << getPosition().y << "\n";
 	}
 
 }
