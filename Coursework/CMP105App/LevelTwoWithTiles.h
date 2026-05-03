@@ -6,6 +6,7 @@
 #include "Coin.h"
 #include "Flag.h"
 #include <algorithm> // for clamp
+#include <iostream>
 
 
 class LevelTwoWithTiles :
@@ -50,6 +51,18 @@ private:
         "Press F to end the day"
     };
 
+    // Pause
+    bool m_isPaused = false;
+    GameObject m_pauseOverlay;
+    sf::Text m_pauseTitle;
+    sf::Text m_pauseHint;
+
+    GameObject m_resumeButton;
+    sf::Text m_resumeLabel;
+
+    GameObject m_menuButton;
+    sf::Text m_menuLabel;
+    
     sf::Vector2f m_cameraTarget;       // where we want to go
     const float CAM_LERP = 5.0f;      // the speed at which the camera follows the player (higher = harder)
     const float CAM_LOOKAHEAD = 100.f;  // pixels ahead

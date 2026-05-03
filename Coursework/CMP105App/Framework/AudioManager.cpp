@@ -5,6 +5,10 @@ AudioManager::AudioManager()
 	addSound("jump", "sfx/jump.mp3");
 	addSound("wind", "sfx/wind.mp3");
 	addSound("death", "sfx/death.mp3");
+	addSound("hit", "sfx/hit-sound.mp3");
+	addSound("gameover", "sfx/gameover.wav");
+	addSound("fire", "sfx/fire-sound.mp3");
+	addSound("healing", "sfx/healing.mp3");
 
 	addMusic("bgm1", "sfx/bgm1.mp3");
 	getMusic("bgm1")->setVolume(20.f);
