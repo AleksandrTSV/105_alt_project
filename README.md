@@ -1,80 +1,73 @@
-# CMP105 Alternative Project
-
-_NOTE: This is an example based on the alternative project as if submitted for the Trunk assignment_
+# CMP105 2026 Final Submission 
 
 ## Game 
 
-**Dino Hanyman: Spanner in the Works** 
+**Dino Handyman** 
 
-A two-level platformer prototype developed as an alternative trunk project to extend for CMP105 students from 2026 onwards. This project has most of the base requirements for a group submission. In the first level, the player has to navigate to the far right-side of the screen, avoiding pitfalls, and activate a lever before returning to the start. In the second level the player must investigate the high wall, backtrack to a box and jump into it from below to reveal a coin, colliding with the coin grants the ability to double-jump, using which they can navigate to the end of the level.
-
-The engineering for this game is restricted to solely using the framework with few additions. 
+A 2D platformer built with C++ and SFML in which the player controls a dinosaur handyman tasked with repairing wind turbines. The player must navigate two levels, interact with levers and flags, defeat worm enemies, and survive using a limited life system.
 
 **Controls:** 
+*	A / D - Move left / right
+*	Space - Jump (double jump available after collecting coin in Level 2)
+*	Left Ctrl - Sprint dash
+*	F - Interact with lever / complete level
+*	E - Throw fireball (2 second cooldown)
+*	Escape - Pause / resume game
+*	R - Reset position (debug)
+*	T - Print coordinates to console (debug)
 
-WASD to move,
-Spacebar to jump,
-F to interact (prompts will appear when possible),
-R to reset (if you get stuck or fall down)
-P to pause,
-L-Control to dash,
-left mouseclick in the menu.
-
-***Extension suggestions***
-
-In addition to the proposal laid out below, there are several features which could usefully be added to this game as part of a branch project, here are a few:
-
-* The game cannot be paused
-* Entirely rework the player controller for precise teleportation-based movement rather than acceleration (which is odd in a platformer)
-* Write a textureLoader or textureManager class
-* Write a levelLoader that reads the tilemaps in from a file rather than them being hardcoded
-* Create a level editor where players can use the full tileset to create their own levels
-* Add more player actions -- the main character has a kick as part of their spritesheet
-* Add enemies with platform-restricted pathing 
-* Gravity manipulation 
-* Create a platforming setpiece to act as the final mechanical challenge
 
 ## Student Details
 
-**Student Name:** William Kavanagh
+**Student Name:** Aleksandr Tsvyatkov
 
-**Student Number:** 0000001
+**Student Number:** 2503161
 
-**Course:** _CGAD_ / _CGT_ I am of both courses, and of none.
+**Course:** _CGAD_
 
----
----
+## Changelist
+* Pause Menu
+    	Press Escape to pause the game at any time. The current frame is visible beneath a semi-transparent overlay. Resume and Main Menu buttons are available, with hover colour feedback.
+* Lives System (HUD)
+    	The player starts with 3 lives displayed as heart icons in the top-left corner of the screen. Hearts update in real time: a full heart becomes empty when a life is lost. The HUD is anchored to the camera so it always stays visible regardless of player position.
+* Fireball Attack
+    	Press E to throw an animated fireball in the direction the player is facing. Fireballs are destroyed on contact with tiles or enemies. A 2-second cooldown prevents spamming.
+* Worm Enemies
+    Animated worm enemies patrol platforms on Level 1. They reverse direction when they reach a wall or a ledge (detected via edge feelers). Touching a worm costs the player one life and triggers a brief invincibility period. Worms can be destroyed by fireballs, with a 30% chance to drop a heart pickup that restores one life.
+* Game Over Screen
+	When all lives are lost, a semi-transparent red overlay appears with a "Game Over!" message. Music stops and a game over sound effect plays. The player can press Enter to return to the main menu.
 
-# Proposal
+
+## Known Bugs
+
+* Fireball may despawn immediately if spawned too close to a tile. This can occur when the player is standing directly against a wall and fires in the direction of the wall.
 
 ## Brief Overview of game 
 
-Dino Handyman: Spanner in the Works, will be a single-level metroidvania platformer where the play controls a small dinosaur. To begin with they will be able to jump, as the game progresses they will gain three skills -- dashing, double-jumping and attacking, in order to complete the game. The level will be setup so that progress is only possible with each ability, e.g., to cross the largest gap you will need to double-jump and to dash. The player will be timed while completing the level and at the end of the game, if they complete it without dying, they will be shown their time alongside the best time achieved. Additional levels could be created later thanks to the use of a data-driven level loading system which is used as the tilemap for the game. 
+Dino Handyman is a 2D side-scrolling platformer built in C++ using the SFML framework. The player controls a dinosaur character across two handcrafted levels, each with its own objective and challenges.
+The player has access to a range of movement abilities: running, jumping, sprinting with a short dash, and throwing fireballs at enemies. The game can be paused at any time on any level via the Escape key, which overlays the current frame with a pause menu.
+In Level 1, the player must traverse a wide map to reach a lever at the far right end of the level and activate it. After that, they must return to the starting flags and interact with them to complete the level. The level features worm enemies that patrol platforms and can be defeated using fireballs. The player has three lives displayed as heart icons in the HUD. Lives are lost by touching worm enemies and can be restored by collecting heart pickups that worms occasionally drop on death. If all lives are lost, a Game Over screen appears.
+In Level 2, the player must explore the level to find a hidden breakable block, strike it from below to release a coin, and collect the coin to unlock the double jump ability. This ability is then required to navigate the rest of the level and reach the goal.
 
 ## Must Have Features
 
-* Spanner Throwing: The player will be able to press 'r' to throw a spanner in the direction they are facing with a slight arc before it falls to the ground. 
-
-* Enemies: Gremlins will be in certain parts of the level and will move towards a player if they are in range. On collision with the player the level will be reset on collision with a spanner they will despawn.
+* Pause Menu: A functional in-game pause screen accessible via Escape, with Resume and Main Menu options. (Implemented.)
+* Lives System: A health/lives system displayed via heart icons in the HUD, serving as the primary lose condition. (Implemented.)
 
 ## Should Have Features
 
-* Data-driven Level Loading: To create a level large enough to introduce the new mechanics without making the code a mess. 
+* Worm Enemies: Animated enemies that patrol platforms, detect ledges, and interact with the player and fireballs. (Implemented.)
+* Fireball Attack: A projectile the player can fire to defeat enemies, with a cooldown and directional animation. (Implemented.)
 
-* Lives and Losing: The play will only have a three lives. If they fall off a platform or hit an enemyn they will lose one life and if they get to zero lives they will see a game over screen.
-
-* Pausing: The game will be able to be paused with a simple transparent overlay. Music will be paused similarly and resumed when play continues.
 
 ## Could Have Features
 
-* Leaderboard: The speed with which a player completes the level will be written to file and then displayed once the level is completed.
+* Game Over Screen: A dedicated overlay displayed when all lives are lost, with audio feedback and a return to menu option. (Implemented.)
+* Heart Pickups: Hearts dropped by defeated enemies that restore one life when collected. (Implemented.)
 
-* A Heads-up Display: Showing the time taken so far, the dash, wrench and double-jump cooldowns and the number of lives remaining will be shown fixed to the screen.
-
-* Gremlin Animations: The gremlins will have different animation cycles including walking, running, idle, and attacking, for various actions they can be performing. 
 
 ## Wish to Have Features
 
-* Checkpoints: There will be positions in the level where the player can restart from if they lose a life, should they have got far enough. These will be placed where the player gets new abilities.
-
-* Coyote Time: The platforming will be enhanced by coyote time, a grace period during which the player can still jump even if they are not on a platform. 
+* Smooth camera with lookahead: A lerp-interpolated camera that leads the player in the direction of movement. (Implemented as part of the movement rework.)
+* Multiple enemy types: Additional enemy varieties beyond the worm. (Not implemented.)
+* Coyote Time: The platforming will be enhanced by coyote time, a grace period during which the player can still jump even if they are not on a platform.(Not Implemented)
